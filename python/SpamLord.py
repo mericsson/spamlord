@@ -3,7 +3,8 @@ import os
 import re
 import pprint
 
-my_first_pat = '(\w+)@(\w+).edu'
+emailPattern = '(\w+)@(\w+).edu'
+phonePattern = '([0-9]+)-([0-9]+)-([0-9]+)'
 
 """ 
 TODO
@@ -31,10 +32,14 @@ def process_file(name, f):
     # sys.stderr.write('[process_file]\tprocessing file: %s\n' % (path))
     res = []
     for line in f:
-        matches = re.findall(my_first_pat,line)
+        matches = re.findall(emailPattern, line)
         for m in matches:
             email = '%s@%s.edu' % m
             res.append((name,'e',email))
+        matches = re.findall(phonePattern, line)
+        for m in matches:
+            phone= '%s-%s-%s' %m
+            res.append((name,'p',phone))
     return res
 
 """
