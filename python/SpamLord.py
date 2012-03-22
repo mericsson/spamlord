@@ -3,8 +3,8 @@ import os
 import re
 import pprint
 
-emailPattern = '(\w+)@(\w+).edu'
-phonePattern = '([0-9]+)-([0-9]+)-([0-9]+)'
+emailPattern = '(\w+)[at|@](\w+).edu'
+phonePattern = '\D\(?([2-9]\d\d)\)?[\.|-| ]?(\d\d\d)[\.|-]?(\d\d\d\d)\D?'
 
 """ 
 TODO
