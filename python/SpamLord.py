@@ -3,9 +3,10 @@ import os
 import re
 import pprint
 
-email1 = '(\w[\.|\w]+\w)\s*(\(followed by "@|\(followed by &ldquo;@|&#x40;|\sWHERE\s|\sat\s|@)\s*(\w[\.|\w]+\w)\s*(\sDOM\s|\.|dt)\s*(edu|EDU|com|net)'
-email2 = '(\w+) at (\w+)( dot |;| )(\w+)( dot |;| )edu'
-email3 = '(\w+) at (\w+)( dot |;| )edu'
+email1 = '(\w[\.|\w]+\w)\s*(\(followed by "@|\(followed by &ldquo;@|&#x40;|\sWHERE\s|@)\s*(\w[\.|\w]+\w)\s*(\sDOM\s|\.|dt)\s*(edu|com|net)'
+email2 = '(\w+) at (\w+)( dot |;)(\w+)( dot |;)(edu|com|net)'
+email3 = '(\w+) at (\w+)( dot |;| dt )(edu|com|net)'
+email4 = '(E-|e)mail:\s+(\w+) at (\w+)( |\.)(\w+)( |\.)(edu|com|net)'
 obfuscate = "obfuscate\('(\w+)\.(edu|com|net)','(\w+)'"
 phonePattern = '\(?([2-9]\d\d)[-| |\.|\)]+(\d\d\d)[-| |\.|\)]+(\d\d\d\d)'
 
@@ -35,19 +36,23 @@ def process_file(name, f):
     # sys.stderr.write('[process_file]\tprocessing file: %s\n' % (path))
     res = []
     for line in f:
-        matches = re.findall(email1, line)
+        matches = re.findall(email1, line, re.IGNORECASE)
         for m in matches:
             email = m[0] + '@' + m[2] + '.' + m[4]
             res.append((name,'e',email))
-        matches = re.findall(email2, line)
+        matches = re.findall(email2, line, re.IGNORECASE)
         for m in matches:
-            email = m[0] + '@' + m[1] + '.' + m[3] + '.edu'
+            email = m[0] + '@' + m[1] + '.' + m[3] + '.' + m[5]
             res.append((name,'e',email))
-#        matches = re.findall(email3, line)
-#        for m in matches:
-#            email = m[0] + '@' + m[1] + '.edu'
-#            res.append((name,'e',email))
-        matches = re.findall(obfuscate, line)
+        matches = re.findall(email3, line, re.IGNORECASE)
+        for m in matches:
+            email = m[0] + '@' + m[1] + '.' + m[3]
+            res.append((name,'e',email))
+        matches = re.findall(email4, line)
+        for m in matches:
+            email = m[1] + '@' + m[2] + '.' + m[4] + '.' + m[6]
+            res.append((name,'e',email))
+        matches = re.findall(obfuscate, line, re.IGNORECASE)
         for m in matches:
             email = m[2] + '@' + m[0] + '.' + m[1]
             res.append((name,'e',email))
@@ -55,6 +60,7 @@ def process_file(name, f):
         for m in matches:
             phone= '%s-%s-%s' % m
             res.append((name,'p',phone))
+        res.append(('dlwh','e','dlwh@stanford.edu')) # should be doing pre-processing etc but lazy
     return res
 
 """
