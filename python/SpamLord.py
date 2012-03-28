@@ -3,8 +3,11 @@ import os
 import re
 import pprint
 
-emailPattern = '(\w+)[at|@](\w+).edu'
-phonePattern = '\D\(?([2-9]\d\d)\)?[\.|-| ]?(\d\d\d)[\.|-]?(\d\d\d\d)\D?'
+email1 = '(\w[\.|\w]+\w)\s*(\(followed by "@|\(followed by &ldquo;@|&#x40;|\sWHERE\s|\sat\s|@)\s*(\w[\.|\w]+\w)\s*(\sDOM\s|\.|dt)\s*(edu|EDU|com|net)'
+email2 = '(\w+) at (\w+)( dot |;| )(\w+)( dot |;| )edu'
+email3 = '(\w+) at (\w+)( dot |;| )edu'
+obfuscate = "obfuscate\('(\w+)\.(edu|com|net)','(\w+)'"
+phonePattern = '\(?([2-9]\d\d)[-| |\.|\)]+(\d\d\d)[-| |\.|\)]+(\d\d\d\d)'
 
 """ 
 TODO
@@ -32,13 +35,25 @@ def process_file(name, f):
     # sys.stderr.write('[process_file]\tprocessing file: %s\n' % (path))
     res = []
     for line in f:
-        matches = re.findall(emailPattern, line)
+        matches = re.findall(email1, line)
         for m in matches:
-            email = '%s@%s.edu' % m
+            email = m[0] + '@' + m[2] + '.' + m[4]
+            res.append((name,'e',email))
+        matches = re.findall(email2, line)
+        for m in matches:
+            email = m[0] + '@' + m[1] + '.' + m[3] + '.edu'
+            res.append((name,'e',email))
+#        matches = re.findall(email3, line)
+#        for m in matches:
+#            email = m[0] + '@' + m[1] + '.edu'
+#            res.append((name,'e',email))
+        matches = re.findall(obfuscate, line)
+        for m in matches:
+            email = m[2] + '@' + m[0] + '.' + m[1]
             res.append((name,'e',email))
         matches = re.findall(phonePattern, line)
         for m in matches:
-            phone= '%s-%s-%s' %m
+            phone= '%s-%s-%s' % m
             res.append((name,'p',phone))
     return res
 
